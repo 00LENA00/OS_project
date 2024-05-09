@@ -478,129 +478,6 @@ scheduler(void)
 
     // Loop over process table looking for process to run.
     acquire(&ptable.lock);
-    #ifdef RR
-      struct proc *p;
-      for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-        if(p->state != RUNNABLE)
-          continue;
-
-        // Switch to chosen process.  It is the process's job
-        // to release ptable.lock and then reacquire it
-        // before jumping back to us.
-        c->proc = p;
-        switchuvm(p);
-        p->num_run++;
-        p->state = RUNNING;
-
-        swtch(&(c->scheduler), p->context);
-        switchkvm();
-
-        // Process is done running for now.
-        // It should have changed its p->state before coming back.
-        c->proc = 0;
-      }
-    #else
-    #ifdef FCFS
-
-    struct proc *p;
-    struct proc *to_run_proc = 0;
-    for (p = ptable.proc; p < &ptable.proc[NPROC]; p++)
-		{
-			if (p->state != RUNNABLE)
-				continue;
-
-			if (to_run_proc == 0)
-				to_run_proc = p;
-			else if (p->ctime < to_run_proc->ctime)
-				to_run_proc = p;
-		}
-    if (to_run_proc != 0 && to_run_proc->state == RUNNABLE)
-		{
-			// cprintf("Process %s with PID %d and start time %d running\n",to_run_proc->name, to_run_proc->pid, to_run_proc->ctime);
-			p = to_run_proc;
-			c->proc = p;
-			switchuvm(p);
-			p->num_run++;
-			p->state = RUNNING;
-
-			swtch(&(c->scheduler), p->context);
-			switchkvm();
-
-			// Process is done running for now.
-			// It should have changed its p->state before coming back.
-			c->proc = 0;
-		}
-    #else
-		#ifdef PBS
-
-      struct proc *p;
-			struct proc *to_run_proc = 0;
-			
-			for (p = ptable.proc; p < &ptable.proc[NPROC]; p++)
-			{
-				if (p->state != RUNNABLE)
-					continue;	
-
-				if (to_run_proc == 0)
-					to_run_proc = p;
-				
-				else if (p-> priority <= to_run_proc-> priority)
-        {
-          if(p-> priority == to_run_proc-> priority && p->ctime < to_run_proc->ctime)
-          {
-            to_run_proc = p;
-          }
-          else
-          {
-            to_run_proc = p;
-          }
-        }
-			}
-
-			if(to_run_proc == 0)
-			{
-				release(&ptable.lock);
-				continue;		
-			}
-
-			for (p = ptable.proc; p < &ptable.proc[NPROC]; p++)
-			{
-				struct proc *q; int flag =0;
-				for(q = ptable.proc; q < &ptable.proc[NPROC]; q++)
-				{
-					if (q->state != RUNNABLE)
-						continue;
-					
-					if(q->priority < to_run_proc->priority)
-						flag = 1;
-          // if(p-> priority == to_run_proc-> priority && p->ctime < to_run_proc->ctime)
-						// flag = 1;
-
-				}
-
-				if(flag == 1) break;
-				
-				if (p->state != RUNNABLE) continue;
-
-				else if (p->priority == to_run_proc->priority)
-				{
-					// cprintf("Process %s with PID %d and priority %d running\n",p->name, p->pid, p->priority);
-					c->proc = p;
-					switchuvm(p);
-					p->num_run++;
-					p->state = RUNNING;
-
-					swtch(&(c->scheduler), p->context);
-					switchkvm();
-					//if (p->state == RUNNABLE) break;
-
-					// Process is done running for now.
-					// It should have changed its p->state before coming back.
-					// cprintf("PID %d done !!!\n\n", to_run_proc->pid);
-					c->proc = 0;
-				}
-			}
-    #else
 		#ifdef MLFQ
 
       for(int i=1; i < 5; i++)
@@ -659,9 +536,7 @@ scheduler(void)
 					  add_proc_to_q(p, p->queue);
 				}
 			}
-    #endif
-    #endif
-    #endif
+
     #endif
     release(&ptable.lock);
   }
