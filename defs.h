@@ -120,6 +120,12 @@ void            userinit(void);
 int             wait(void);
 void            wakeup(void*);
 void            yield(void);
+int             getps(void);
+int             waitx(int *, int *);
+void            ticking();
+void            change_q_flag(struct proc* p);
+void            incr_curr_ticks(struct proc *p);
+int             set_priority(int priority,int pid);
 
 // swtch.S
 void            swtch(struct context**, struct context*);
