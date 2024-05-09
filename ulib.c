@@ -4,8 +4,6 @@
 #include "user.h"
 #include "x86.h"
 
-#define MLFQ
-
 char*
 strcpy(char *s, const char *t)
 {

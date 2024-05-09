@@ -8,6 +8,7 @@
 #include "traps.h"
 #include "spinlock.h"
 
+int q_ticks_max[5] = {1, 2, 4, 8, 16};
 // Interrupt descriptor table (shared by all CPUs).
 struct gatedesc idt[256];
 extern uint vectors[];  // in vectors.S: array of 256 entry pointers
@@ -110,6 +111,9 @@ trap(struct trapframe *tf)
     
  if(myproc() && myproc()->state == RUNNING && tf->trapno == T_IRQ0+IRQ_TIMER)
   {
+    #ifdef FCFS
+    	yield();
+    #endif
     #ifdef MLFQ
 			if(myproc()->curr_ticks >= q_ticks_max[myproc()->queue])
 			{
