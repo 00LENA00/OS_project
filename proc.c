@@ -15,7 +15,7 @@ struct {
 } ptable;
 
 struct proc *queue[5][NPROC];
-int q_tail[5] = {-1, -1, -1, -1, -1}, q_ticks[5] = {0,0,0,0,0};
+int q_tail[5] = {-1, -1, -1, -1, -1}, q_ticks[5] = {10,10,15,20,30};
 
 static struct proc *initproc;
 
@@ -44,7 +44,7 @@ int add_proc_to_q(struct proc *p, int q_no)
 			return -1;
 	}
   // if(p->pid<=pizza && p->pid>=burger){
-	// cprintf("Process with PID %d added to Queue %d at %d\n", p->pid, q_no,ticks);}
+	//cprintf("Process with PID %d added to Queue %d at %d\n", p->pid, q_no,ticks);
 	p->enter = ticks;
 	p -> queue = q_no;
 	q_tail[q_no]++;
@@ -59,7 +59,7 @@ int remove_proc_from_q(struct proc *p, int q_no)
 	{
 		if(queue[q_no][i] -> pid == p->pid)
 		{
-			// cprintf("Process with PID %d found in Queue %d\n", p->pid, q_no);
+			//cprintf("Process with PID %d found in Queue %d\n", p->pid, q_no);
 			rem = i;
 			proc_found = 1;
 			break;
@@ -67,14 +67,14 @@ int remove_proc_from_q(struct proc *p, int q_no)
 	}
 	if(proc_found  == 0)
 	{
-		// cprintf("ERROR : REMOVE_Q : no Process with pid %d found in Queue %d\n", p->pid, q_no);
+		//cprintf("ERROR : REMOVE_Q : no Process with pid %d found in Queue %d\n", p->pid, q_no);
 		return -1;
 	}
 	for(int i = rem; i < q_tail[q_no]; i++)
 	queue[q_no][i] = queue[q_no][i+1]; 
 	q_tail[q_no] -= 1;
   //   if(p->pid<=pizza && p->pid>=burger){
-	// cprintf("Process with PID %d is removed from Queue %d at %d\n", p->pid, q_no,ticks);}
+	//cprintf("Process with PID %d is removed from Queue %d at %d\n", p->pid, q_no,ticks);
 	return 1;
 }
 
@@ -190,7 +190,7 @@ found:
 	p->iotime = 0;
 	p->waitshh = -1282128;
   p->num_run = 0;
-	p->priority = 60; // default
+	p->priority = 50; // default
   	#ifdef MLFQ
 		p->curr_ticks = 0;
 		p->queue = 0;
@@ -501,6 +501,37 @@ scheduler(void)
         c->proc = 0;
       }
     #endif
+        #ifdef FCFS
+
+    struct proc *p;
+    struct proc *to_run_proc = 0;
+    for (p = ptable.proc; p < &ptable.proc[NPROC]; p++)
+		{
+			if (p->state != RUNNABLE)
+				continue;
+
+			if (to_run_proc == 0)
+				to_run_proc = p;
+			else if (p->ctime < to_run_proc->ctime)
+				to_run_proc = p;
+		}
+    if (to_run_proc != 0 && to_run_proc->state == RUNNABLE)
+		{
+			// cprintf("Process %s with PID %d and start time %d running\n",to_run_proc->name, to_run_proc->pid, to_run_proc->ctime);
+			p = to_run_proc;
+			c->proc = p;
+			switchuvm(p);
+			p->num_run++;
+			p->state = RUNNING;
+
+			swtch(&(c->scheduler), p->context);
+			switchkvm();
+
+			// Process is done running for now.
+			// It should have changed its p->state before coming back.
+			c->proc = 0;
+		}
+    #endif
 		#ifdef MLFQ
 
       for(int i=1; i < 5; i++)
@@ -508,12 +539,11 @@ scheduler(void)
 				for(int j=0; j <= q_tail[i]; j++)
 				{
 					struct proc *p = queue[i][j];
-          int age = ticks - p->enter;
+          				int age = ticks - p->enter;
 					if(age > 30)
 					{
 						remove_proc_from_q(p, i);
-    // if(p->pid<=pizza && p->pid>=burger){
-		// 				cprintf("Process %d moved to queue %d from %d due to age %d at %d\n", p->pid, i-1,i, age, ticks);}
+						cprintf("Process %d moved to queue %d from %d due to age %d at %d\n", p->pid, i-1,i, age, ticks);
 						add_proc_to_q(p, i-1);
 					}
 				}
@@ -534,9 +564,10 @@ scheduler(void)
 			{
 				p->curr_ticks++;
 				p->num_run++;
-        //   if(p->pid<=pizza && p->pid>=burger){
-				// cprintf("Scheduling %s with PID %d from Queue %d with current tick %d at tick %d\n",p->name, p->pid, p->queue, p->curr_ticks,ticks);}
+				//cprintf("Scheduling %s with PID %d from Queue %d with current tick %d at tick %d\n",p->name, p->pid, p->queue, p->curr_ticks,ticks);
 				p->qticks[p->queue]++;
+				if( 4<= p->pid && p->pid<=15) //OMG fix it
+					cprintf("PID: %d, qticks[%d]= %d\n", p->pid, p->queue, p->qticks[p->queue]); //OMG fix it
 				c->proc = p;
 				switchuvm(p);
 				p->state = RUNNING;
@@ -553,11 +584,14 @@ scheduler(void)
 						if(p->queue != 4){
 					  // remove_proc_from_q(p, p->queue);
 						p->queue+=1;
-            }
+						cprintf("gotohell PID %d go to %d\n", p->pid, p->queue);//OMG fix it
+            					}
 					}
 					else p->curr_ticks = 0;
-					  add_proc_to_q(p, p->queue);
+					add_proc_to_q(p,p->queue);
 				}
+					
+				
 			}
 
     #endif
@@ -661,7 +695,7 @@ sleep(void *chan, struct spinlock *lk)
   }
 }
 
-//PAGEBREAK!
+//PBREAK!
 // Wake up all processes sleeping on chan.
 // The ptable lock must be held.
 static void
