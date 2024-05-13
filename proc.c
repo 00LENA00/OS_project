@@ -543,7 +543,7 @@ scheduler(void)
 					if(age > 30)
 					{
 						remove_proc_from_q(p, i);
-						cprintf("Process %d moved to queue %d from %d due to age %d at %d\n", p->pid, i-1,i, age, ticks);
+						//cprintf("Process %d moved to queue %d from %d due to age %d at %d\n", p->pid, i-1,i, age, ticks);
 						add_proc_to_q(p, i-1);
 					}
 				}
@@ -566,8 +566,8 @@ scheduler(void)
 				p->num_run++;
 				//cprintf("Scheduling %s with PID %d from Queue %d with current tick %d at tick %d\n",p->name, p->pid, p->queue, p->curr_ticks,ticks);
 				p->qticks[p->queue]++;
-				if( 4<= p->pid && p->pid<=15) //OMG fix it
-					cprintf("PID: %d, qticks[%d]= %d\n", p->pid, p->queue, p->qticks[p->queue]); //OMG fix it
+				//if( 4<= p->pid && p->pid<=15) //OMG fix it
+					//cprintf("PID: %d, qticks[%d]= %d\n", p->pid, p->queue, p->qticks[p->queue]); //OMG fix it
 				c->proc = p;
 				switchuvm(p);
 				p->state = RUNNING;
@@ -584,7 +584,7 @@ scheduler(void)
 						if(p->queue != 4){
 					  // remove_proc_from_q(p, p->queue);
 						p->queue+=1;
-						cprintf("gotohell PID %d go to %d\n", p->pid, p->queue);//OMG fix it
+						cprintf("PID[%d]: move to queue[%d] at %d\n", p->pid, p->queue, ticks);//OMG fix it
             					}
 					}
 					else p->curr_ticks = 0;

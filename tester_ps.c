@@ -27,7 +27,7 @@ int main(int argc, char *argv[])
         }
         else
         {
-          for (i = 0; i < 100000000; i++)
+          for (i = 0; i < 150000000; i++)
           {
             ; //cpu time
           }
