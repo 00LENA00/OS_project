@@ -355,7 +355,7 @@ exit(void)
   curproc->state = ZOMBIE;
   curproc->etime = ticks;
   curproc->waitshh=curproc->etime - curproc->ctime;
-	cprintf("-> EXIT MSG : Total Time for process [%s] with pid [%d] is [%d]\n",curproc->name,curproc->pid, curproc->etime - curproc->ctime);
+	cprintf("[EXIT] --> Total Time for pid [%d] is [%d]\n",curproc->pid, curproc->etime - curproc->ctime);
   sched();
   panic("zombie exit");
 }
@@ -565,7 +565,7 @@ scheduler(void)
 				p->curr_ticks++;
 				p->num_run++;
 				//cprintf("Scheduling %s with PID %d from Queue %d with current tick %d at tick %d\n",p->name, p->pid, p->queue, p->curr_ticks,ticks);
-				p->qticks[p->queue]++;
+				p->qticks[p->queue]++;j
 				//if( 4<= p->pid && p->pid<=15) //OMG fix it
 					//cprintf("PID: %d, qticks[%d]= %d\n", p->pid, p->queue, p->qticks[p->queue]); //OMG fix it
 				c->proc = p;
@@ -584,7 +584,7 @@ scheduler(void)
 						if(p->queue != 4){
 					  // remove_proc_from_q(p, p->queue);
 						p->queue+=1;
-						cprintf("PID[%d]: move to queue[%d] at %d\n", p->pid, p->queue, ticks);//OMG fix it
+						//cprintf("PID[%d]: move to queue[%d]\n", p->pid, p->queue);//OMG fix it
             					}
 					}
 					else p->curr_ticks = 0;
@@ -803,6 +803,7 @@ getps(void)
   #endif
   for (p = ptable.proc; p < &ptable.proc[NPROC]; ++p)
   {
+    if(p->pid >= 3) {
     #ifndef MLFQ
     if (p->state == SLEEPING)
     {
@@ -841,6 +842,7 @@ getps(void)
     }
     #endif
 
+  }
   }
   release(&ptable.lock);
 	return ret;
