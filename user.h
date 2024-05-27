@@ -28,6 +28,7 @@ int waitx(int*, int*);
 int getps(void);
 int set_priority(int , int );
 
+
 // ulib.c
 int stat(const char*, struct stat*);
 char* strcpy(char*, const char*);

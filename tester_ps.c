@@ -1,5 +1,7 @@
 #include "types.h"
 #include "user.h"
+#include "stat.h"
+
 
 int set_priority(int pid, int priority);
 int number_of_processes = 10;
@@ -24,18 +26,19 @@ int main(int argc, char *argv[]) {
                 if (k <= j) {
                     sleep(200); //io time
                 } else {
-                    for (i = 0; i < 150000000; i++) {
+                    for (i = 0; i < 100000000; i++) {
                         ; //cpu time
                     }
                 }
             }
+            
             printf(1, "Process: PID %d :%d Finished\n", getpid(), j);
+            //yield();
             getps();
             exit();
+            
         } 
-        #ifdef PBS
-        set_priority(100-(20+j), pid);
-        #endif
+
     }
     for (j = 0; j < number_of_processes; j++) {
         wait();

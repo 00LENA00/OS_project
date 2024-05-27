@@ -24,6 +24,8 @@ extern void forkret(void);
 extern void trapret(void);
 static void wakeup1(void *chan);
 
+
+
 void ticking(){
 	for(struct proc *p=ptable.proc; p<&ptable.proc[NPROC]; ++p){
 		if(p->state == RUNNING){
@@ -355,7 +357,7 @@ exit(void)
   curproc->state = ZOMBIE;
   curproc->etime = ticks;
   curproc->waitshh=curproc->etime - curproc->ctime;
-	cprintf("[EXIT] --> Total Time for pid [%d] is [%d]\n",curproc->pid, curproc->etime - curproc->ctime);
+	cprintf("[Terminate] --> Total Time for pid [%d] is [%d]\n",curproc->pid, curproc->etime - curproc->ctime);
   sched();
   panic("zombie exit");
 }
@@ -505,6 +507,7 @@ scheduler(void)
 
     struct proc *p;
     struct proc *to_run_proc = 0;
+    
     for (p = ptable.proc; p < &ptable.proc[NPROC]; p++)
 		{
 			if (p->state != RUNNABLE)
@@ -531,6 +534,7 @@ scheduler(void)
 			// It should have changed its p->state before coming back.
 			c->proc = 0;
 		}
+		
     #endif
 		#ifdef MLFQ
 

@@ -15,6 +15,9 @@ extern uint vectors[];  // in vectors.S: array of 256 entry pointers
 struct spinlock tickslock;
 uint ticks;
 
+int wakeup_ps = 0; // FCFS
+const int TICKS_LIMIT = 500; //FCFS
+
 void
 tvinit(void)
 {
@@ -52,6 +55,9 @@ trap(struct trapframe *tf)
     if(cpuid() == 0){
       acquire(&tickslock);
       ticks++;
+      if(myproc()){
+      	myproc()->ticks++; //add for FCFS
+      }
       wakeup(&ticks);
       release(&tickslock);
       ticking();
@@ -114,8 +120,17 @@ trap(struct trapframe *tf)
     
  if(myproc() && myproc()->state == RUNNING && tf->trapno == T_IRQ0+IRQ_TIMER)
   {
-    #ifdef FCFS
-    	yield();
+    #ifdef FCFS // hyunwoo's FCFS
+    if(myproc() && myproc()->state == RUNNING &&
+      tf->trapno == T_IRQ0+IRQ_TIMER && (myproc()->ticks > TICKS_LIMIT || wakeup_ps > 0 )){
+      	if(myproc()->ticks > TICKS_LIMIT) {
+      		kill(myproc()->pid);
+      		}
+      	else{
+      		wakeup_ps = 0;
+    		yield();
+    		}
+    	}
     #endif
     #ifdef MLFQ
 			if(myproc()->curr_ticks >= q_ticks_max[myproc()->queue])

@@ -63,6 +63,7 @@ struct proc {
   int change_q;
   int enter;
   int pbs_yield_flag;
+  int ticks; // FCFS
 };
 
 
