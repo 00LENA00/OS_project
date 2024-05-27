@@ -15,7 +15,7 @@ struct {
 } ptable;
 
 struct proc *queue[5][NPROC];
-int q_tail[5] = {-1, -1, -1, -1, -1}, q_ticks[5] = {10,10,15,20,30};
+int q_tail[5] = {-1, -1, -1, -1, -1};
 
 static struct proc *initproc;
 
@@ -538,18 +538,21 @@ scheduler(void)
 			{
 				for(int j=0; j <= q_tail[i]; j++)
 				{
-					struct proc *p = queue[i][j];
-          				int age = ticks - p->enter;
-					if(age > 30)
-					{
-						remove_proc_from_q(p, i);
-						//cprintf("Process %d moved to queue %d from %d due to age %d at %d\n", p->pid, i-1,i, age, ticks);
-						add_proc_to_q(p, i-1);
-					}
+					//struct proc *p = queue[i][j];
+          				//int age = ticks - p->enter;
+					//if(age > 30)
+					//{
+					//	remove_proc_from_q(p, i);
+					//	//cprintf("Process %d moved to queue %d from %d due to age %d at %d\n", p->pid, i-1,i, age, ticks);
+					//	add_proc_to_q(p, i-1);
+					//}
 				}
 			}
-
+			
+			
 			struct proc *p = 0;
+			//OMG FIX IT!!
+			
 			for(int i=0; i < 5; i++)
 			{
 				if(q_tail[i] >=0)
@@ -562,10 +565,10 @@ scheduler(void)
 
 			if(p!=0 && p->state==RUNNABLE)
 			{
-				p->curr_ticks++;
+				//p->curr_ticks++;
 				p->num_run++;
 				//cprintf("Scheduling %s with PID %d from Queue %d with current tick %d at tick %d\n",p->name, p->pid, p->queue, p->curr_ticks,ticks);
-				p->qticks[p->queue]++;j
+				//p->qticks[p->queue]++;
 				//if( 4<= p->pid && p->pid<=15) //OMG fix it
 					//cprintf("PID: %d, qticks[%d]= %d\n", p->pid, p->queue, p->qticks[p->queue]); //OMG fix it
 				c->proc = p;
@@ -682,9 +685,9 @@ sleep(void *chan, struct spinlock *lk)
   // Go to sleep.
   p->chan = chan;
   p->state = SLEEPING;
-
+	
   sched();
-
+  //cprintf("Process %d (%s) woke up from chan %p\n", p->pid, p->name, chan);
   // Tidy up.
   p->chan = 0;
 
@@ -796,10 +799,10 @@ getps(void)
 	int ret = -1;
   acquire(&ptable.lock);
   #ifndef MLFQ
-  cprintf("PID\tPriority    State \tr_time\tw_time\ts_time\tName\n");
+  cprintf("PID   State \tr_time\tw_time\tc_time\n");
   #endif
   #ifdef MLFQ
-  cprintf("PID\tPriority    State \tr_time\tw_time\ts_time\tn_run\tcur_q\t q0\tq1\tq2\tq3\tq4\tName\n");
+  cprintf("PID   State \tr_time\tw_time\tc_time\tn_run\tcur_q\t q0\tq1\tq2\tq3\tq4\n");
   #endif
   for (p = ptable.proc; p < &ptable.proc[NPROC]; ++p)
   {
@@ -807,38 +810,38 @@ getps(void)
     #ifndef MLFQ
     if (p->state == SLEEPING)
     {
-      cprintf("%d \t %d \t   SLEEPING \t %d \t %d \t %d\t %s\n",  p->pid, p->priority, p->rtime, ticks - p->ctime - p->rtime -p->iotime,p->iotime,p->name);
+      cprintf("%d   SLEEPING \t %d \t %d \t %d \n",  p->pid, p->rtime, ticks - p->ctime - p->rtime -p->iotime,p->ctime);
     }
     else if (p->state == RUNNING)
     {
-      cprintf("%d \t %d \t   RUNNING  \t %d \t %d \t %d\t %s\n",  p->pid, p->priority, p->rtime, ticks - p->ctime - p->rtime -p->iotime,p->iotime,p->name);
+      cprintf("%d   RUNNING  \t %d \t %d \t %d \n",  p->pid, p->rtime, ticks - p->ctime - p->rtime -p->iotime,p->ctime);
     }
     else if (p->state == RUNNABLE)
     {
-      cprintf("%d \t %d \t   RUNNABLE \t %d \t %d \t %d\t %s\n",  p->pid, p->priority, p->rtime, ticks - p->ctime - p->rtime -p->iotime,p->iotime,p->name);
+      cprintf("%d   RUNNABLE \t %d \t %d \t %d \n",  p->pid, p->rtime, ticks - p->ctime - p->rtime -p->iotime,p->ctime);
     }
     else if (p->state == ZOMBIE)
     {
-      cprintf("%d \t %d \t    ZOMBIE \t %d \t %d \t %d\t %s\n",  p->pid, p->priority, p->rtime, p->etime - p->ctime - p->rtime -p->iotime,p->iotime,p->name);
+      cprintf("%d    ZOMBIE \t %d \t %d \n",  p->pid, p->rtime, p->etime - p->ctime - p->rtime -p->iotime,p->ctime);
     }
     #endif
 
     #ifdef MLFQ
    if (p->state == SLEEPING)
     {
-      cprintf("%d \t %d \t   SLEEPING \t %d \t %d \t %d \t %d \t %d \t %d \t %d \t %d \t %d \t %d\t %s\n",  p->pid, p->priority, p->rtime, ticks - p->ctime - p->rtime -p->iotime,p->iotime,p->num_run,p->queue,p->qticks[0],p->qticks[1],p->qticks[2],p->qticks[3],p->qticks[4],p->name);
+      cprintf("%d   SLEEPING \t %d \t %d \t %d \t %d \t %d \t %d \t %d \t %d \t %d \t %d\n",  p->pid,  p->rtime, ticks - p->ctime - p->rtime -p->iotime,p->ctime,p->num_run,p->queue,p->qticks[0],p->qticks[1],p->qticks[2],p->qticks[3],p->qticks[4]);
     }
     else if (p->state == RUNNING)
     {
-      cprintf("%d \t %d \t   RUNNING  \t %d \t %d \t %d \t %d \t %d \t %d \t %d \t %d \t %d \t %d\t %s\n",  p->pid, p->priority, p->rtime, ticks - p->ctime - p->rtime -p->iotime,p->iotime,p->num_run,p->queue,p->qticks[0],p->qticks[1],p->qticks[2],p->qticks[3],p->qticks[4],p->name);
+      cprintf("%d   RUNNING  \t %d \t %d \t %d \t %d \t %d \t %d \t %d \t %d \t %d \t %d\n",  p->pid,  p->rtime, ticks - p->ctime - p->rtime -p->iotime,p->ctime,p->num_run,p->queue,p->qticks[0],p->qticks[1],p->qticks[2],p->qticks[3],p->qticks[4]);
     }
     else if (p->state == RUNNABLE)
     {
-      cprintf("%d \t %d \t   RUNNABLE \t %d \t %d \t %d \t %d \t %d \t %d \t %d \t %d \t %d \t %d\t %s\n",  p->pid, p->priority, p->rtime, ticks - p->ctime - p->rtime -p->iotime,p->iotime,p->num_run,p->queue,p->qticks[0],p->qticks[1],p->qticks[2],p->qticks[3],p->qticks[4],p->name);
+      cprintf("%d   RUNNABLE \t %d \t %d \t %d \t %d \t %d \t %d \t %d \t %d \t %d \t %d\n",  p->pid,  p->rtime, ticks - p->ctime - p->rtime -p->iotime,p->ctime,p->num_run,p->queue,p->qticks[0],p->qticks[1],p->qticks[2],p->qticks[3],p->qticks[4]);
     }
     else if (p->state == ZOMBIE)
     {
-      cprintf("%d \t %d \t    ZOMBIE \t %d \t %d \t %d \t %d \t %d \t %d \t %d \t %d \t %d \t %d\t %s\n",  p->pid, p->priority, p->rtime, p->etime - p->ctime - p->rtime -p->iotime,p->iotime,p->num_run,-1,p->qticks[0],p->qticks[1],p->qticks[2],p->qticks[3],p->qticks[4],p->name);
+      cprintf("%d    ZOMBIE \t %d \t %d \t %d \t %d \t %d \t %d \t %d \t %d \t %d \t %d\n",  p->pid,  p->rtime, p->etime - p->ctime - p->rtime -p->iotime,p->ctime,p->num_run,-1,p->qticks[0],p->qticks[1],p->qticks[2],p->qticks[3],p->qticks[4]);
     }
     #endif
 
