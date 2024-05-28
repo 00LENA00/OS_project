@@ -8,7 +8,7 @@
 #include "traps.h"
 #include "spinlock.h"
 
-int q_ticks_max[5] = {1, 2, 4, 8, 16};
+int q_ticks_max[5] = {20, 30, 40, 50, 66};
 // Interrupt descriptor table (shared by all CPUs).
 struct gatedesc idt[256];
 extern uint vectors[];  // in vectors.S: array of 256 entry pointers
@@ -55,9 +55,10 @@ trap(struct trapframe *tf)
     if(cpuid() == 0){
       acquire(&tickslock);
       ticks++;
-      if(myproc()){
-      	myproc()->ticks++; //add for FCFS
-      }
+      //if(myproc()){
+      //	myproc()->ticks++; //add for FCFS
+     // }
+      
       wakeup(&ticks);
       release(&tickslock);
       ticking();
@@ -121,8 +122,7 @@ trap(struct trapframe *tf)
  if(myproc() && myproc()->state == RUNNING && tf->trapno == T_IRQ0+IRQ_TIMER)
   {
     #ifdef FCFS // hyunwoo's FCFS
-    if(myproc() && myproc()->state == RUNNING &&
-      tf->trapno == T_IRQ0+IRQ_TIMER && (myproc()->ticks > TICKS_LIMIT || wakeup_ps > 0 )){
+    if( myproc()->ticks > TICKS_LIMIT || wakeup_ps > 0 ){
       	if(myproc()->ticks > TICKS_LIMIT) {
       		kill(myproc()->pid);
       		}
@@ -137,12 +137,14 @@ trap(struct trapframe *tf)
 			{
 				change_q_flag(myproc());
 				// cprintf("Process with PID %d on Queue %d yielded out as ticks completed = %d\n", myproc()->pid, myproc()->queue, myproc()->curr_ticks);
-				yield();
+				yield(); 
+				
 			}
 
 			else 		
 			{
 				incr_curr_ticks(myproc());
+				//yield();
 				// cprintf("Process with PID %d continuing on Queue %d with current tick now being %d\n", myproc()->pid, myproc()->queue, myproc()->curr_ticks);
 			}	
     #endif

@@ -538,10 +538,10 @@ scheduler(void)
     #endif
 		#ifdef MLFQ
 
-      for(int i=1; i < 5; i++)
-			{
-				for(int j=0; j <= q_tail[i]; j++)
-				{
+      //for(int i=1; i < 5; i++)
+			//{
+				//for(int j=0; j <= q_tail[i]; j++)
+				//{
 					//struct proc *p = queue[i][j];
           				//int age = ticks - p->enter;
 					//if(age > 30)
@@ -550,8 +550,8 @@ scheduler(void)
 					//	//cprintf("Process %d moved to queue %d from %d due to age %d at %d\n", p->pid, i-1,i, age, ticks);
 					//	add_proc_to_q(p, i-1);
 					//}
-				}
-			}
+				//}
+			//}
 			
 			
 			struct proc *p = 0;
@@ -561,6 +561,7 @@ scheduler(void)
 			{
 				if(q_tail[i] >=0)
 				{
+					
 					p = queue[i][0];
 					remove_proc_from_q(p, i);
 					break;
@@ -689,7 +690,7 @@ sleep(void *chan, struct spinlock *lk)
   // Go to sleep.
   p->chan = chan;
   p->state = SLEEPING;
-	
+  //remove_proc_from_q(p, p->queue); //?!?
   sched();
   //cprintf("Process %d (%s) woke up from chan %p\n", p->pid, p->name, chan);
   // Tidy up.
@@ -714,9 +715,9 @@ wakeup1(void *chan)
     if(p->state == SLEEPING && p->chan == chan){
       p->state = RUNNABLE;
       #ifdef MLFQ
-				p->curr_ticks = 0;
-				add_proc_to_q(p, p->queue);
-			#endif
+		p->curr_ticks = 0;
+		add_proc_to_q(p, p->queue);
+	#endif
     }
   }
 }
