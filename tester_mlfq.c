@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
     if (pid == 0)
     {
       sleep(j*10+200); //io time
-      for (int i = 0; i < 100000000; i++)
+      for (int i = 0; i < 170000000; i++)
       {
         c=a;
         a=b;

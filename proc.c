@@ -7,8 +7,8 @@
 #include "proc.h"
 #include "spinlock.h"
 
-// int pizza=10;
-// int burger=3;
+ int pizza=8;
+ int burger=3;
 struct {
   struct spinlock lock;
   struct proc proc[NPROC];
@@ -45,8 +45,8 @@ int add_proc_to_q(struct proc *p, int q_no)
 		if(p->pid == queue[q_no][i]->pid)
 			return -1;
 	}
-  // if(p->pid<=pizza && p->pid>=burger){
-	//cprintf("Process with PID %d added to Queue %d at %d\n", p->pid, q_no,ticks);
+   if(p->pid<=pizza && p->pid>=burger){
+	cprintf("Process with PID %d added to Queue %d at %d\n", p->pid, q_no,ticks);}
 	p->enter = ticks;
 	p -> queue = q_no;
 	q_tail[q_no]++;
@@ -75,8 +75,8 @@ int remove_proc_from_q(struct proc *p, int q_no)
 	for(int i = rem; i < q_tail[q_no]; i++)
 	queue[q_no][i] = queue[q_no][i+1]; 
 	q_tail[q_no] -= 1;
-  //   if(p->pid<=pizza && p->pid>=burger){
-	//cprintf("Process with PID %d is removed from Queue %d at %d\n", p->pid, q_no,ticks);
+     if(p->pid<=pizza && p->pid>=burger){
+	cprintf("Process with PID %d is removed from Queue %d at %d\n", p->pid, q_no,ticks);}
 	return 1;
 }
 
@@ -538,20 +538,21 @@ scheduler(void)
     #endif
 		#ifdef MLFQ
 
-      //for(int i=1; i < 5; i++)
-			//{
-				//for(int j=0; j <= q_tail[i]; j++)
-				//{
-					//struct proc *p = queue[i][j];
-          				//int age = ticks - p->enter;
-					//if(age > 30)
-					//{
-					//	remove_proc_from_q(p, i);
-					//	//cprintf("Process %d moved to queue %d from %d due to age %d at %d\n", p->pid, i-1,i, age, ticks);
-					//	add_proc_to_q(p, i-1);
-					//}
-				//}
-			//}
+      for(int i=1; i < 5; i++)
+			{
+				for(int j=0; j <= q_tail[i]; j++)
+				{
+					struct proc *p = queue[i][j];
+          				int age = ticks - p->enter;
+					if(age > 30)
+					{
+						remove_proc_from_q(p, i);
+						if(p->pid<=pizza && p->pid>=burger){
+		 				cprintf("Process %d moved to queue %d from %d due to age %d at %d\n", p->pid, i-1,i, age, ticks);}
+						add_proc_to_q(p, i-1);
+					}
+				}
+			}
 			
 			
 			struct proc *p = 0;
@@ -572,7 +573,8 @@ scheduler(void)
 			{
 				//p->curr_ticks++;
 				p->num_run++;
-				//cprintf("Scheduling %s with PID %d from Queue %d with current tick %d at tick %d\n",p->name, p->pid, p->queue, p->curr_ticks,ticks);
+				if(p->pid<=pizza && p->pid>=burger)
+				cprintf("Scheduling %s with PID %d from Queue %d with current tick %d at tick %d\n",p->name, p->pid, p->queue, p->curr_ticks,ticks);
 				//p->qticks[p->queue]++;
 				//if( 4<= p->pid && p->pid<=15) //OMG fix it
 					//cprintf("PID: %d, qticks[%d]= %d\n", p->pid, p->queue, p->qticks[p->queue]); //OMG fix it
@@ -709,7 +711,7 @@ sleep(void *chan, struct spinlock *lk)
 static void
 wakeup1(void *chan)
 {
-  struct proc *p;
+  struct proc *p;	
 
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
     if(p->state == SLEEPING && p->chan == chan){
