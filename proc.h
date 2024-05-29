@@ -57,12 +57,10 @@ struct proc {
   int priority;
   int num_run;
   int qticks[5];
-  int tempa;
   int queue;
   int curr_ticks;
   int change_q;
   int enter;
-  int pbs_yield_flag;
   int ticks; // FCFS
 };
 
