@@ -9,40 +9,38 @@ int b=1;
 int c;
 int main(int argc, char *argv[])
 {
-  #ifndef MLFQ
-    printf(1, "Scheduler flag is not MLFQ\n");
-    exit();
-    return 0;
-  #else
-  int j;
-  for (j = 0; j < number_of_processes; j++)
-  {
-    int pid = fork();
-    if (pid < 0)
-    {
-      printf(1, "Fork failed\n");
-      continue;
-    }
-    if (pid == 0)
-    {
-      sleep(j*10+200); //io time
-      for (int i = 0; i < 170000000; i++)
-      {
-        c=a;
-        a=b;
-        b=c;
-      }
-      
-      printf(1, "Process: PID %d :%d Finished\n", getpid(),j);
-      exit();
-    }
-  }
-  for (j = 0; j < number_of_processes+5; j++)
-  {
-    wait();
-  }
-  
-  getps();
-  #endif
+
+    int j;
+    for (j = 0; j < number_of_processes; j++) {
+        int pid = fork();
+        if (pid < 0) {
+            printf(1, "Fork failed\n");
+            continue;
+        }
+        if (pid == 0) {
+            volatile int i;
+            for (volatile int k = 0; k < number_of_processes; k++) {
+                if (k <= j) {
+                    sleep(120); //io time
+                } else {
+                    for (i = 0; i < 100000000; i++) {
+                        ; //cpu time
+                     
+                    }
+                    getps();
+                }
+            }
+            
+            printf(1, "Process: PID %d :%d Finished\n", getpid(), j);
+            //yield();
+            getps();
+
   exit();
+}
+    }
+    for (j = 0; j < number_of_processes; j++) {
+        wait();
+    }
+    getps();
+    exit();
 }

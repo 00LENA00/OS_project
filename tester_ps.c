@@ -25,13 +25,12 @@ int main(int argc, char *argv[]) {
             for (volatile int k = 0; k < number_of_processes; k++) {
                 if (k <= j) {
                     sleep(200); //io time
-                    getps();
                 } else {
-                    for (i = 0; i < 100000000; i++) {
+                    for (i = 0; i < 170000000; i++) {
                         ; //cpu time
                      
                     }
-                    getps();
+
                 }
             }
             

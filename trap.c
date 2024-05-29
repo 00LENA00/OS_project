@@ -8,7 +8,7 @@
 #include "traps.h"
 #include "spinlock.h"
 
-int q_ticks_max[5] = {20, 30, 40, 50, 66};
+int q_ticks_max[5] = {2, 4, 8, 16, 32};
 // Interrupt descriptor table (shared by all CPUs).
 struct gatedesc idt[256];
 extern uint vectors[];  // in vectors.S: array of 256 entry pointers
